@@ -40,6 +40,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Square,
   Sun,
   Trash2,
   User,
@@ -113,3 +114,4 @@ export const IconThemeLight = createAppIcon(Sun, "18px");
 export const IconThemeSystem = createAppIcon(Monitor, "18px");
 export const IconUser = createAppIcon(User);
 export const SendIcon = createAppIcon(Send);
+export const StopIcon = createAppIcon(Square);
