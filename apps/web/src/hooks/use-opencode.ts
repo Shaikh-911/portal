@@ -77,7 +77,11 @@ export function useConfig() {
 export function useProviders() {
   const backend = useBackend();
 
-  return useSWR(backend ? `${backend.basePath}/providers` : null, fetcher);
+  // Provider catalog is effectively static for the session; refetching on
+  // focus only risks transient list states that reset the model picker (#49).
+  return useSWR(backend ? `${backend.basePath}/providers` : null, fetcher, {
+    revalidateOnFocus: false,
+  });
 }
 
 export function useAgents() {

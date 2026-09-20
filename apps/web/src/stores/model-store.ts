@@ -20,6 +20,14 @@ function decodeModelKeyPart(value: string) {
   }
 }
 
+export function isDefaultModel(model: SelectedModel) {
+  return (
+    model.providerID === DEFAULT_MODEL.providerID &&
+    model.modelID === DEFAULT_MODEL.modelID &&
+    !model.variant
+  );
+}
+
 export function parseModelKey(key: string): SelectedModel {
   if (key.includes("|")) {
     const [providerID = "", modelID = "", variant = ""] = key
@@ -49,7 +57,6 @@ interface ModelState {
   isInitialized: boolean;
   setSelectedModel: (model: SelectedModel) => void;
   setModelFromKey: (key: string) => void;
-  setModelFromDefault: (defaultKey: string | null) => void;
   getModelKey: () => string;
 }
 
@@ -62,18 +69,6 @@ export const useModelStore = create<ModelState>()(
       setModelFromKey: (key) => {
         const model = parseModelKey(key);
         set({ selectedModel: model });
-      },
-      setModelFromDefault: (defaultKey) => {
-        const current = get().selectedModel;
-        const isDefault =
-          current.providerID === DEFAULT_MODEL.providerID &&
-          current.modelID === DEFAULT_MODEL.modelID &&
-          !current.variant;
-
-        if (defaultKey && isDefault) {
-          const model = parseModelKey(defaultKey);
-          set({ selectedModel: model });
-        }
       },
       getModelKey: () => toModelKey(get().selectedModel),
     }),

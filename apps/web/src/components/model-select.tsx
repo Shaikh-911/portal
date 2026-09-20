@@ -9,7 +9,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { SearchField, SearchInput } from "@/components/ui/search-field";
-import { toModelKey, useModelStore } from "@/stores/model-store";
+import { toModelKey, isDefaultModel, useModelStore } from "@/stores/model-store";
 import { useProviders } from "@/hooks/use-opencode";
 
 interface ModelItem {
@@ -123,7 +123,6 @@ export function ModelSelect() {
 
   const selectedModel = useModelStore((s) => s.selectedModel);
   const setModelFromKey = useModelStore((s) => s.setModelFromKey);
-  const setModelFromDefault = useModelStore((s) => s.setModelFromDefault);
 
   const data = useMemo(
     () => (rawData ? transformProviders(rawData) : null),
@@ -173,24 +172,16 @@ export function ModelSelect() {
   useEffect(() => {
     if (!fallbackModel) return;
 
-    if (!modelKeys.has(selectedModelKey)) {
-      setModelFromKey(
-        modelKeys.has(selectedBaseModelKey)
-          ? selectedBaseModelKey
-          : fallbackModel,
-      );
-      return;
-    }
+    // Never clobber an explicit choice: a refetch (e.g. SWR revalidating on
+    // window focus) can transiently return a model list that omits the
+    // persisted selection, and "repairing" from that snapshot silently
+    // switches the user's model. Only initialize the untouched default.
+    // The picker already displays `fallbackModel` while the stored key is
+    // absent, so an explicit selection restores itself. Fixes #49.
+    if (!isDefaultModel(selectedModel)) return;
 
-    setModelFromDefault(fallbackModel);
-  }, [
-    fallbackModel,
-    modelKeys,
-    selectedBaseModelKey,
-    selectedModelKey,
-    setModelFromDefault,
-    setModelFromKey,
-  ]);
+    setModelFromKey(fallbackModel);
+  }, [fallbackModel, selectedModel, setModelFromKey]);
 
   return (
     <Select
